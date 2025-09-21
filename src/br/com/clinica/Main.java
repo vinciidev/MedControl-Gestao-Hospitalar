@@ -32,7 +32,7 @@ public class Main {
 
             // Configurações e exibição da janela
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.pack(); // Ajusta o tamanho da janela ao conteúdo
+            frame.setSize(900, 600); // Ajusta o tamanho da janela ao conteúdo
             frame.setLocationRelativeTo(null); // Centraliza
             frame.setResizable(false);
             frame.setVisible(true);

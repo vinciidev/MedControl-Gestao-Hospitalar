@@ -122,7 +122,7 @@ public class Login {
 
         // Configurações
         mainMenuFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainMenuFrame.pack();
+        mainMenuFrame.setSize(900, 600);
         mainMenuFrame.setLocationRelativeTo(null); // Centraliza
         mainMenuFrame.setVisible(true); // Exibe a nova janela
 
@@ -196,7 +196,7 @@ public class Login {
         acessarButton.setOpaque(true);
         acessarButton.setSelected(false);
         acessarButton.setText("Acessar");
-        mainPanel.add(acessarButton, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        mainPanel.add(acessarButton, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label3 = new JLabel();
         label3.setIcon(new ImageIcon(getClass().getResource("/logos/LogoMed.jpg")));
         label3.setText("");
