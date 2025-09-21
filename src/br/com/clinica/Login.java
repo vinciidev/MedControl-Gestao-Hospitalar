@@ -10,9 +10,8 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
-// MUDANÇA 1: A classe NÃO é mais um JFrame. É só um controlador.
 public class Login {
-    // Componentes que serão ligados ao .form
+    // Componentes do form
     private JPanel mainPanel;
     private JPasswordField passwordField1;
     private JButton acessarButton;
@@ -21,12 +20,9 @@ public class Login {
     private Usuario usuarioAutenticado = null;
 
     public Login() {
-        // MUDANÇA 2: O construtor agora só chama o método de eventos.
-        // O método $$$setupUI$$$() é chamado automaticamente antes.
         configurarEventos();
     }
 
-    // MUDANÇA 3: Método para o Main pegar o painel pronto.
     public JPanel getMainPanel() {
         return mainPanel;
     }
@@ -38,11 +34,11 @@ public class Login {
     }
 
     private void realizarLogin() {
-        // 1. Coleta os dados da tela
+        // Armazena as credenciais
         String username = loginField.getText().trim();
         String password = new String(passwordField1.getPassword());
 
-        // 2. Validação de campos vazios
+        // Verifica se os fields estão vazios
         if (username.isEmpty()) {
             JOptionPane.showMessageDialog(mainPanel, "O campo 'Login' é obrigatório.", "Campo Vazio", JOptionPane.WARNING_MESSAGE);
             loginField.requestFocus();
@@ -54,15 +50,15 @@ public class Login {
             return;
         }
 
-        // 3. Feedback visual para o usuário
+        // Troca o text do button para Autenticando (feedback visual)
         acessarButton.setEnabled(false);
         acessarButton.setText("Autenticando...");
 
-        // 4. Executa a autenticação em uma thread separada para não travar a tela
+        // Executa a autenticação em uma thread separada
         SwingWorker<Usuario, Void> worker = new SwingWorker<>() {
             @Override
             protected Usuario doInBackground() throws Exception {
-                // Chama o método do seu DAO
+                // Chama o metodo no DAO para realizar autenticação
                 UsuarioDAO dao = new UsuarioDAO();
                 return dao.autenticar(username, password);
             }
@@ -70,10 +66,10 @@ public class Login {
             @Override
             protected void done() {
                 try {
-                    usuarioAutenticado = get(); // Pega o resultado da autenticação
+                    usuarioAutenticado = get(); // Pega o resultado
 
                     if (usuarioAutenticado != null) {
-                        // SUCESSO: Usuário autenticado
+                        // SUCESSO
                         JOptionPane.showMessageDialog(mainPanel,
                                 "Acesso concedido! Bem-vindo(a), " + usuarioAutenticado.getNome() + ".",
                                 "Login bem-sucedido",
@@ -82,7 +78,7 @@ public class Login {
                         abrirProximaTela();
 
                     } else {
-                        // FALHA: Usuário ou senha incorretos
+                        // FALHA
                         JOptionPane.showMessageDialog(mainPanel,
                                 "Login ou senha inválidos. Verifique suas credenciais.",
                                 "Acesso Negado",
@@ -100,23 +96,24 @@ public class Login {
                             JOptionPane.ERROR_MESSAGE);
                     e.printStackTrace();
                 } finally {
-                    // Restaura o botão em qualquer cenário
+                    // Limpa os fields e troca o text do button para acessar (em qualquer dos casos)
                     acessarButton.setEnabled(true);
                     acessarButton.setText("Acessar");
                 }
             }
         };
 
-        worker.execute(); // Inicia a autenticação em background
+        worker.execute();
     }
 
     private void abrirProximaTela() {
-        // MUDANÇA 4: Maneira correta de fechar a janela que contém este painel.
+        // Fecha o Panel atual e passa ao proximo
         JFrame frameDaAplicacao = (JFrame) SwingUtilities.getWindowAncestor(mainPanel);
         if (frameDaAplicacao != null) {
             frameDaAplicacao.dispose();
         }
     }
+
 
     // O código abaixo é gerado pelo IntelliJ e não precisa ser alterado.
     {
