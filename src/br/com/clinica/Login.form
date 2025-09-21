@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="Login">
-  <grid id="27dc6" layout-manager="GridLayoutManager" row-count="8" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="br.com.clinica.Login">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="8" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="664" height="516"/>
+      <xy x="20" y="20" width="664" height="539"/>
     </constraints>
     <properties>
       <background color="-262149"/>
@@ -12,30 +12,6 @@
       <color color="-2104859"/>
     </border>
     <children>
-      <component id="ade8f" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <icon value="resources/logos/LogoMed.jpg"/>
-          <text value=""/>
-        </properties>
-      </component>
-      <grid id="2b119" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
-        <constraints>
-          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <background color="-1576449"/>
-          <opaque value="true"/>
-          <requestFocusEnabled value="true"/>
-        </properties>
-        <border type="line">
-          <title-color color="-2104859"/>
-        </border>
-        <children/>
-      </grid>
       <hspacer id="5b29a">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -55,26 +31,6 @@
         <properties>
           <background color="-1444865"/>
           <text value=""/>
-        </properties>
-      </component>
-      <component id="34d7" class="javax.swing.JButton" binding="acessarButton" custom-create="true" default-binding="true">
-        <constraints>
-          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <background color="-15649182"/>
-          <borderPainted value="false"/>
-          <doubleBuffered value="false"/>
-          <enabled value="false"/>
-          <focusCycleRoot value="false"/>
-          <focusPainted value="true"/>
-          <focusTraversalPolicyProvider value="false"/>
-          <focusable value="true"/>
-          <foreground color="-1"/>
-          <hideActionText value="false"/>
-          <opaque value="true"/>
-          <selected value="false"/>
-          <text value="Acessar"/>
         </properties>
       </component>
       <component id="e333a" class="javax.swing.JLabel">
@@ -106,6 +62,46 @@
           <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>
       </vspacer>
+      <component id="cba8b" class="javax.swing.JTextField" binding="loginField">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties>
+          <background color="-1444865"/>
+          <editable value="true"/>
+        </properties>
+      </component>
+      <component id="34d7" class="javax.swing.JButton" binding="acessarButton" default-binding="true">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <background color="-15649182"/>
+          <borderPainted value="false"/>
+          <doubleBuffered value="false"/>
+          <enabled value="true"/>
+          <focusCycleRoot value="false"/>
+          <focusPainted value="true"/>
+          <focusTraversalPolicyProvider value="false"/>
+          <focusable value="true"/>
+          <foreground color="-1"/>
+          <hideActionText value="false"/>
+          <opaque value="true"/>
+          <selected value="false"/>
+          <text value="Acessar"/>
+        </properties>
+      </component>
+      <component id="ade8f" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="resources/logos/LogoMed.jpg"/>
+          <text value=""/>
+        </properties>
+      </component>
     </children>
   </grid>
 </form>
