@@ -1,20 +1,36 @@
 package br.com.clinica;
 
 import javax.swing.*;
+import java.net.URL;
 
 public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // 1. Cria a janela principal (o "frame")
+
+            // Cria a janela de login
             JFrame frame = new JFrame("MedControl - Login");
 
-            // 2. Cria uma instância da sua classe de lógica do Login
+            // Puxa o icon que esta na pasta resources e retorna caso não encontre
+            try {
+                URL iconeURL = Main.class.getResource("/logos/icon.png");
+                if (iconeURL != null) {
+                    ImageIcon icone = new ImageIcon(iconeURL);
+                    frame.setIconImage(icone.getImage());
+                } else {
+                    System.err.println("Recurso do ícone não encontrado: icon.png");
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao carregar o ícone: " + e.getMessage());
+            }
+
+
+            // Cria uma sessão de login
             Login loginController = new Login();
 
-            // 3. Pega o painel visual (já pronto) e coloca na janela
+            // Passa o designer do MainPanel (Form de login) para a tela
             frame.setContentPane(loginController.getMainPanel());
 
-            // 4. Configura e exibe a janela
+            // Configurações e exibição da janela
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.pack(); // Ajusta o tamanho da janela ao conteúdo
             frame.setLocationRelativeTo(null); // Centraliza
