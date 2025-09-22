@@ -41,9 +41,23 @@ public class MainPainel {
     public MainPainel(Usuario usuario) {
         this.usuarioLogado = usuario;
 
-        desktopPane = new JDesktopPane();
-        desktopPane.setOpaque(false);
         $$$setupUI$$$();
+
+        desktopPane = new JDesktopPane();
+
+        desktopPane.setLayout(new BorderLayout());
+
+        desktopPane.add(customPanel, BorderLayout.CENTER);
+
+        desktopPane.setLayer(customPanel, Integer.valueOf(Integer.MIN_VALUE));
+
+        mainPainel.remove(customPanel);
+        mainPainel.add(desktopPane, new GridConstraints(7, 0, 1, 11,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null, 0, false));
+
         configurarLabelsDinamicos();
         configurarEventos();
     }

@@ -148,6 +148,39 @@ public class ConsultaView extends JInternalFrame {
 
     // O resto dos métodos (alterarStatus, carregarPacientes, excluirConsulta) continua igual.
     private void alterarStatus(String novoStatus) { /* ... */ }
-    private void carregarPacientes() { /* ... */ }
+    private void carregarPacientes() {
+        cbPaciente.removeAllItems(); // Limpa a lista para não duplicar
+
+        // Usa SwingWorker para buscar dados em segundo plano sem travar a tela
+        SwingWorker<List<Paciente>, Void> worker = new SwingWorker<>() {
+
+            @Override
+            protected List<Paciente> doInBackground() throws Exception {
+                // Cria o DAO e chama o método para buscar todos os pacientes
+                return new PacienteDAO().listarTodos();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    // Pega o resultado da busca (a lista de pacientes)
+                    List<Paciente> pacientes = get();
+                    // Adiciona cada paciente da lista ao JComboBox
+                    for (Paciente paciente : pacientes) {
+                        cbPaciente.addItem(paciente);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(
+                            ConsultaView.this,
+                            "Erro ao carregar a lista de pacientes: " + e.getMessage(),
+                            "Erro",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        };
+        worker.execute(); // Inicia a busca
+    }
     private void excluirConsulta() { /* ... */ }
 }

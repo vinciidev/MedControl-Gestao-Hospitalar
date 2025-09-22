@@ -10,6 +10,10 @@ public class Paciente {
     private String celular;
 
     // Getters e Setters
+    @Override
+    public String toString() {
+        return this.getNome();
+    }
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getNome() { return nome; }
