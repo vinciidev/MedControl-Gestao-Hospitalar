@@ -8,6 +8,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutionException;
 
 public class CadastroUsuarioForm {
     private JPanel cadastroUsuarioPainel;
@@ -72,33 +73,41 @@ public class CadastroUsuarioForm {
         cadastrarButton.setEnabled(false);
         cadastrarButton.setText("Salvando...");
 
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+        // Usando SwingWorker para não travar a interface
+        SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
-            protected Void doInBackground() throws Exception {
-                // Chama o método que agora é automático
-                new UsuarioDAO().salvarUsuario(novoUsuario);
-                return null;
+            protected String doInBackground() throws Exception {
+                UsuarioDAO dao = new UsuarioDAO();
+
+                // 1. VERIFICAÇÃO PROATIVA: Checa se o usuário já existe ANTES de tentar salvar.
+                if (dao.usuarioJaExiste(novoUsuario.getUsername())) {
+                    return "USUARIO_EXISTENTE"; // Retorna um código para indicar o problema
+                }
+
+                // 2. Se não existir, prossegue com a operação de salvar.
+                dao.salvarUsuario(novoUsuario);
+                return "SUCESSO"; // Retorna um código de sucesso
             }
 
             @Override
             protected void done() {
                 try {
-                    get();
-                    JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Usuário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                    limparCampos();
+                    String resultado = get(); // Pega o resultado do doInBackground()
+
+                    if ("SUCESSO".equals(resultado)) {
+                        JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Usuário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                        limparCampos();
+                    } else if ("USUARIO_EXISTENTE".equals(resultado)) {
+                        JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Erro ao salvar usuário: Este nome de usuário já está em uso.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
+
                 } catch (Exception e) {
-                    String mensagemErro = "Ocorreu um erro inesperado.";
-                    if (e.getCause() instanceof SQLException) {
-                        SQLException sqlEx = (SQLException) e.getCause();
-                        if ("23505".equals(sqlEx.getSQLState())) { // Código de erro para 'unique_violation'
-                            mensagemErro = "Este nome de usuário já está em uso.";
-                        } else {
-                            mensagemErro = sqlEx.getMessage();
-                        }
-                    } else if (e.getCause() != null) {
+                    // Trata outros erros que possam ocorrer (ex: falha de conexão com o BD)
+                    String mensagemErro = "Ocorreu um erro inesperado ao tentar salvar o usuário.";
+                    if (e.getCause() != null) {
                         mensagemErro = e.getCause().getMessage();
                     }
-                    JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Erro ao salvar usuário: " + mensagemErro, "Erro", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Erro: " + mensagemErro, "Erro", JOptionPane.ERROR_MESSAGE);
                 } finally {
                     cadastrarButton.setEnabled(true);
                     cadastrarButton.setText("Cadastrar Usuário");
@@ -116,11 +125,8 @@ public class CadastroUsuarioForm {
         nomeField.requestFocusInWindow();
     }
 
-    /**
-     * NOTE: Este método é gerenciado pelo IntelliJ IDEA.
-     * Você deve remover os campos de CRM e Especialidade do seu
-     * formulário visual (.form) para que este código corresponda.
-     */
+    // O restante do seu código gerado pela IDE continua aqui...
+
     private void $$$setupUI$$$() {
         cadastroUsuarioPainel = new JPanel();
         cadastroUsuarioPainel.setLayout(new GridLayoutManager(6, 2, new Insets(10, 10, 10, 10), -1, -1));

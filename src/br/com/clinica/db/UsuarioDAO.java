@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class UsuarioDAO {
 
@@ -33,21 +34,25 @@ public class UsuarioDAO {
         return usuario;
     }
 
-    /**
-     * Salva um novo usuário. Se o perfil for MEDICO, cria automaticamente
-     * a entrada correspondente na tabela 'medicos' com valores padrão.
-     * @param usuario O objeto Usuario a ser salvo.
-     * @throws SQLException
-     */
+    public boolean usuarioJaExiste(String username) throws SQLException {
+        String sql = "SELECT 1 FROM usuarios WHERE username = ?";
+        try (Connection conn = Conexao.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next(); // Retorna true se encontrar um registro
+            }
+        }
+    }
+
     public void salvarUsuario(Usuario usuario) throws SQLException {
         String sqlUsuario = "INSERT INTO usuarios (nome, username, password, role) VALUES (?, ?, ?, ?::roles) RETURNING id";
         Connection conn = null;
 
         try {
             conn = Conexao.getConexao();
-            conn.setAutoCommit(false); // Inicia a transação
+            conn.setAutoCommit(false);
 
-            // 1. Insere na tabela 'usuarios' e pega o ID gerado
             String usuarioId;
             try (PreparedStatement ps = conn.prepareStatement(sqlUsuario)) {
                 ps.setString(1, usuario.getNome());
@@ -63,11 +68,16 @@ public class UsuarioDAO {
                 }
             }
 
-            // 2. Se o perfil for MEDICO, insere na tabela 'medicos' com valores padrão
+
             if (usuario.getRole() == Usuario.Role.MEDICO) {
+
+                Random random = new Random();
+                String crmAleatorio = String.format("%05d", random.nextInt(100000));
+
                 Medico medico = new Medico();
-                medico.setCrm("0000"); // Valor padrão
-                medico.setEspecialidade("Clinico Geral"); // Valor padrão
+                medico.setCrm(crmAleatorio);
+
+                medico.setEspecialidade("Clinico Geral");
                 medico.setUsuarioId(usuarioId);
                 new MedicoDAO().salvar(medico, conn);
             }
