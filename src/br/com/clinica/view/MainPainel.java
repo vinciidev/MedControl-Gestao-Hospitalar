@@ -158,8 +158,19 @@ public class MainPainel {
         });
 
         prontuarioEButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(mainPainel.getTopLevelAncestor(), "Tela de prontuários em breve!");
-            // Futuramente: new ProntuarioForm();
+            // Este botão agora abre a tela de CONSULTAS
+            // onde o usuário poderá selecionar uma e abrir o prontuário.
+            JInternalFrame[] frames = desktopPane.getAllFrames();
+            for (JInternalFrame frame : frames) {
+                if (frame instanceof ConsultaView) {
+                    frame.moveToFront();
+                    return;
+                }
+            }
+            ConsultaView consultaView = new ConsultaView();
+            desktopPane.add(consultaView);
+
+            consultaView.setVisible(true);
         });
 
         marcacoesButton.addActionListener(e -> {
@@ -172,7 +183,7 @@ public class MainPainel {
                 }
             }
 
-            // Se não encontrou, cria uma nova
+
             ConsultaView consultaView = new ConsultaView();
             desktopPane.add(consultaView); // Adiciona a janela de consultas ao painel principal
             consultaView.setVisible(true); // Exibe a janela

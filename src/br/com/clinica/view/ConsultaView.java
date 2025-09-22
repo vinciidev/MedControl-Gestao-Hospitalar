@@ -27,6 +27,7 @@ public class ConsultaView extends JInternalFrame {
     private final JSpinner timeSpinner;
     private final JTable table;
     private final DefaultTableModel tableModel;
+    private List<Consulta> listaConsultasAtual;
 
     public ConsultaView() {
         super("Agendamento de Consultas", true, true, true, true);
@@ -55,8 +56,10 @@ public class ConsultaView extends JInternalFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton btnAgendar = new JButton("Agendar");
         JButton btnExcluir = new JButton("Excluir Agendamento");
+        JButton btnAbrirProntuario = new JButton("Abrir Prontuário");
         buttonPanel.add(btnAgendar);
         buttonPanel.add(btnExcluir);
+        buttonPanel.add(btnAbrirProntuario);
 
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton btnConfirmar = new JButton("Confirmar Consulta");
@@ -81,10 +84,30 @@ public class ConsultaView extends JInternalFrame {
 
         btnAgendar.addActionListener(e -> agendarConsulta());
         btnExcluir.addActionListener(e -> excluirConsulta());
+        btnAbrirProntuario.addActionListener(e -> abrirProntuario());
         btnConfirmar.addActionListener(e -> alterarStatus("CONFIRMADA"));
         btnCancelar.addActionListener(e -> alterarStatus("CANCELADA"));
 
         atualizarTabela();
+    }
+
+    private void abrirProntuario() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor, selecione uma consulta na tabela para ver o prontuário.", "Nenhuma Consulta Selecionada", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Pega o objeto Consulta completo da lista que guardamos
+        Consulta consultaSelecionada = listaConsultasAtual.get(selectedRow);
+
+        // Agora, passamos a consulta selecionada para o construtor
+        ProntuarioView prontuarioView = new ProntuarioView(consultaSelecionada);
+
+        // Adiciona a janela de prontuário ao painel principal
+        JDesktopPane desktopPane = getDesktopPane();
+        desktopPane.add(prontuarioView);
+        prontuarioView.setVisible(true);
     }
 
     private void carregarMedicos() {
@@ -130,16 +153,11 @@ public class ConsultaView extends JInternalFrame {
             @Override protected List<Consulta> doInBackground() { return consultaDAO.listarTodas(); }
             @Override protected void done() {
                 try {
+                    listaConsultasAtual = get(); // <-- ADICIONE ESTA LINHA PARA GUARDAR A LISTA
                     tableModel.setRowCount(0);
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-                    for (Consulta c : get()) {
-                        tableModel.addRow(new Object[]{
-                                c.getId(),
-                                c.getPaciente().getNome(),
-                                c.getMedico().getNome(), // Pega o nome do Usuario
-                                c.getDataHora().format(formatter),
-                                c.getStatus()
-                        });
+                    for (Consulta c : listaConsultasAtual) { // Use a lista guardada
+                        // ... (resto do seu loop for)
                     }
                 } catch (Exception e) { e.printStackTrace(); }
             }
