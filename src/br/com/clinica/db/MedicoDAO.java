@@ -14,6 +14,7 @@ public class MedicoDAO {
      * @param conn A conexão de banco de dados ativa.
      * @throws SQLException
      */
+
     public void salvar(Medico medico, Connection conn) throws SQLException {
         String sql = "INSERT INTO medicos (crm, especialidade, usuario_id) VALUES (?, ?, ?::uuid)";
 

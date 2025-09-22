@@ -26,7 +26,6 @@ public class MainPainel {
     private JButton sairButton;
     private JButton cadastrarNovoPacienteButton;
     private JButton adminButton;
-    private JButton prontuarioEButton;
     private JButton marcacoesButton;
     private JLabel labelBoasVindas;
     private JLabel labelHora;
@@ -157,21 +156,6 @@ public class MainPainel {
             cadastroFrame.setVisible(true);
         });
 
-        prontuarioEButton.addActionListener(e -> {
-            // Este botão agora abre a tela de CONSULTAS
-            // onde o usuário poderá selecionar uma e abrir o prontuário.
-            JInternalFrame[] frames = desktopPane.getAllFrames();
-            for (JInternalFrame frame : frames) {
-                if (frame instanceof ConsultaView) {
-                    frame.moveToFront();
-                    return;
-                }
-            }
-            ConsultaView consultaView = new ConsultaView();
-            desktopPane.add(consultaView);
-
-            consultaView.setVisible(true);
-        });
 
         marcacoesButton.addActionListener(e -> {
             // Procura por uma janela de consulta já aberta para não abrir várias iguais
@@ -211,13 +195,10 @@ public class MainPainel {
         mainPainel.add(sairButton, new GridConstraints(0, 9, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         cadastrarNovoPacienteButton = new JButton();
         cadastrarNovoPacienteButton.setText("Cadastrar Novo Paciente");
-        mainPainel.add(cadastrarNovoPacienteButton, new GridConstraints(0, 0, 1, 6, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        mainPainel.add(cadastrarNovoPacienteButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         adminButton = new JButton();
         adminButton.setText("Admin");
         mainPainel.add(adminButton, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        prontuarioEButton = new JButton();
-        prontuarioEButton.setText("Prontuário E.");
-        mainPainel.add(prontuarioEButton, new GridConstraints(0, 7, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
         mainPainel.add(spacer2, new GridConstraints(2, 0, 1, 11, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
@@ -239,8 +220,8 @@ public class MainPainel {
         labelTemperatura.setText("Temperatura:");
         mainPainel.add(labelTemperatura, new GridConstraints(6, 9, 1, 2, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         marcacoesButton = new JButton();
-        marcacoesButton.setText("Marcações");
-        mainPainel.add(marcacoesButton, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        marcacoesButton.setText("Marcações / Prontuário Eletrônico");
+        mainPainel.add(marcacoesButton, new GridConstraints(0, 1, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         labelRole = new JLabel();
         labelRole.setForeground(new Color(-262149));
         labelRole.setText("Role");
