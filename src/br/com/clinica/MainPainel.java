@@ -136,6 +136,7 @@ public class MainPainel {
             cadastroFrame.setSize(450, 500);
             cadastroFrame.setLocationRelativeTo(mainFrame); // Centraliza em relação à tela principal
             cadastroFrame.setVisible(true);
+
         });
 
         prontuarioEButton.addActionListener(e -> {
