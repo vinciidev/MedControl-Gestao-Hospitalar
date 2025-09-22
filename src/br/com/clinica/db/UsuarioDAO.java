@@ -82,11 +82,11 @@ public class UsuarioDAO {
                 new MedicoDAO().salvar(medico, conn);
             }
 
-            conn.commit(); // Confirma a transação se tudo deu certo
+            conn.commit();
 
         } catch (SQLException e) {
-            if (conn != null) conn.rollback(); // Desfaz tudo em caso de erro
-            throw e; // Relança a exceção para a interface tratar
+            if (conn != null) conn.rollback();
+            throw e;
         } finally {
             if (conn != null) {
                 conn.setAutoCommit(true);

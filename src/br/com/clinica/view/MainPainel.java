@@ -43,11 +43,8 @@ public class MainPainel {
         $$$setupUI$$$();
 
         desktopPane = new JDesktopPane();
-
         desktopPane.setLayout(new BorderLayout());
-
         desktopPane.add(customPanel, BorderLayout.CENTER);
-
         desktopPane.setLayer(customPanel, Integer.valueOf(Integer.MIN_VALUE));
 
         mainPainel.remove(customPanel);
@@ -59,7 +56,41 @@ public class MainPainel {
 
         configurarLabelsDinamicos();
         configurarEventos();
+        configurarAcessosPorRole(); // <-- NOVO MÉTODO CHAMADO AQUI
     }
+
+    // --- INÍCIO DA ALTERAÇÃO ---
+
+    /**
+     * Controla a visibilidade dos botões com base na função (role) do usuário logado.
+     */
+    private void configurarAcessosPorRole() {
+        // Pega a função do usuário logado
+        Usuario.Role role = usuarioLogado.getRole();
+
+        // Usa um switch para definir as permissões de cada função
+        switch (role) {
+            case MEDICO:
+            case RECEPCIONISTA:
+                // Esconde os botões que eles não podem acessar
+                cadastrarNovoPacienteButton.setVisible(false);
+                adminButton.setVisible(false);
+                break;
+
+            case ADMINISTRADOR:
+            case TI:
+                // Podem ver tudo, então não fazemos nada aqui (os botões já são visíveis por padrão)
+                break;
+
+            default:
+                // Por segurança, caso uma nova role seja criada e não tratada, esconde os botões sensíveis
+                cadastrarNovoPacienteButton.setVisible(false);
+                adminButton.setVisible(false);
+                break;
+        }
+    }
+
+    // --- FIM DA ALTERAÇÃO ---
 
     public JPanel getMainPainel() {
         return mainPainel;
@@ -79,7 +110,6 @@ public class MainPainel {
         buscarTemperatura();
     }
 
-
     private void atualizarData() {
         LocalDate hoje = LocalDate.now();
         Locale localeBrasil = new Locale("pt", "BR");
@@ -97,6 +127,7 @@ public class MainPainel {
         SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
             protected String doInBackground() throws Exception {
+                // Assumindo que a localização é Feira de Santana, conforme a conversa anterior
                 URL url = new URL("https://wttr.in/Feira%20de%20Santana?format=%t");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
@@ -128,17 +159,15 @@ public class MainPainel {
 
         cadastrarNovoPacienteButton.addActionListener(e -> {
             JFrame cadastroFrame = new JFrame("Cadastro de Novo Paciente");
-
-            // Pega o ícone da janela principal e aplica na nova
             JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(mainPainel);
             if (mainFrame != null) {
                 cadastroFrame.setIconImages(mainFrame.getIconImages());
             }
 
             cadastroFrame.setContentPane(new CadastroPacienteForm().getPainel());
-            cadastroFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // DISPOSE_ON_CLOSE fecha só esta janela
+            cadastroFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             cadastroFrame.setSize(450, 500);
-            cadastroFrame.setLocationRelativeTo(mainFrame); // Centraliza em relação à tela principal
+            cadastroFrame.setLocationRelativeTo(mainFrame);
             cadastroFrame.setVisible(true);
         });
 
@@ -150,31 +179,43 @@ public class MainPainel {
             }
 
             cadastroFrame.setContentPane(new CadastroUsuarioForm().getPainel());
-            cadastroFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // DISPOSE_ON_CLOSE fecha só esta janela
+            cadastroFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             cadastroFrame.setSize(450, 500);
-            cadastroFrame.setLocationRelativeTo(mainFrame); // Centraliza em relação à tela principal
+            cadastroFrame.setLocationRelativeTo(mainFrame);
             cadastroFrame.setVisible(true);
         });
 
-
         marcacoesButton.addActionListener(e -> {
-            // Procura por uma janela de consulta já aberta para não abrir várias iguais
             JInternalFrame[] frames = desktopPane.getAllFrames();
             for (JInternalFrame frame : frames) {
                 if (frame instanceof ConsultaView) {
-                    frame.moveToFront(); // Se já estiver aberta, traz para frente
+                    try {
+                        if (frame.isIcon()) frame.setIcon(false); // Restaura se estiver minimizado
+                        frame.setSelected(true); // Traz para frente e foca
+                    } catch (java.beans.PropertyVetoException ex) {
+                        // Ignora exceção
+                    }
                     return;
                 }
             }
 
-
             ConsultaView consultaView = new ConsultaView();
-            desktopPane.add(consultaView); // Adiciona a janela de consultas ao painel principal
-            consultaView.setVisible(true); // Exibe a janela
+            desktopPane.add(consultaView);
+            consultaView.setVisible(true);
         });
-
     }
 
+    private void createUIComponents() {
+        try {
+            URL imageURL = getClass().getResource("/images/homeImage.png");
+            if (imageURL == null) throw new Exception("Arquivo de imagem não encontrado");
+            Image backgroundImage = new ImageIcon(imageURL).getImage();
+            customPanel = new ImagePanel(backgroundImage);
+        } catch (Exception e) {
+            customPanel = new JPanel();
+            System.err.println("Imagem de fundo não encontrada: " + e.getMessage());
+        }
+    }
 
     /**
      * Method generated by IntelliJ IDEA GUI Designer
@@ -234,18 +275,5 @@ public class MainPainel {
      */
     public JComponent $$$getRootComponent$$$() {
         return mainPainel;
-    }
-
-    private void createUIComponents() {
-        try {
-            URL imageURL = getClass().getResource("/images/homeImage.png");
-            Image backgroundImage = new ImageIcon(imageURL).getImage();
-
-            customPanel = new ImagePanel(backgroundImage); //
-
-        } catch (Exception e) {
-            customPanel = new JPanel(); //
-            System.err.println("Imagem de fundo não encontrada.");
-        }
     }
 }
