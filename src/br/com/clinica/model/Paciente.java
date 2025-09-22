@@ -3,15 +3,15 @@ package br.com.clinica.model;
 import java.time.LocalDate;
 
 public class Paciente {
-    private int id;
+    private String id;
     private String nome;
     private String cpf;
     private LocalDate dataNascimento;
     private String celular;
 
     // Getters e Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
     public String getCpf() { return cpf; }

@@ -41,7 +41,8 @@ public class MainPainel {
     public MainPainel(Usuario usuario) {
         this.usuarioLogado = usuario;
 
-
+        desktopPane = new JDesktopPane();
+        desktopPane.setOpaque(false);
         $$$setupUI$$$();
         configurarLabelsDinamicos();
         configurarEventos();
