@@ -109,8 +109,19 @@ public class MainPainel {
         });
 
         cadastrarNovoPacienteButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(mainPainel.getTopLevelAncestor(), "Tela de cadastro em breve!");
-            // Futuramente: new CadastroPacienteForm();
+            JFrame cadastroFrame = new JFrame("Cadastro de Novo Paciente");
+
+            // Pega o ícone da janela principal e aplica na nova
+            JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(mainPainel);
+            if (mainFrame != null) {
+                cadastroFrame.setIconImages(mainFrame.getIconImages());
+            }
+
+            cadastroFrame.setContentPane(new CadastroPacienteForm().getPainel());
+            cadastroFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // DISPOSE_ON_CLOSE fecha só esta janela
+            cadastroFrame.setSize(450, 500);
+            cadastroFrame.setLocationRelativeTo(mainFrame); // Centraliza em relação à tela principal
+            cadastroFrame.setVisible(true);
         });
 
         adminButton.addActionListener(e -> {

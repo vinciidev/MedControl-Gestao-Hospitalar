@@ -1,0 +1,203 @@
+package br.com.clinica;
+
+import br.com.clinica.db.PacienteDAO;
+import br.com.clinica.model.Paciente;
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.uiDesigner.core.Spacer;
+
+import javax.swing.*;
+import javax.swing.text.MaskFormatter;
+import java.awt.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+public class CadastroPacienteForm {
+    private JPanel CadastroPacientePainel;
+    private JTextField nomeField;
+    private JFormattedTextField cpfField;
+    private JFormattedTextField nascimentoField;
+    private JFormattedTextField celularField;
+    private JButton cadastrarPacienteButton;
+
+    public CadastroPacienteForm() {
+        aplicarMascaras();
+        configurarEventos();
+    }
+
+    public JPanel getPainel() {
+        return CadastroPacientePainel;
+    }
+
+    private void aplicarMascaras() {
+        try {
+            MaskFormatter mascaraCpf = new MaskFormatter("###.###.###-##");
+            mascaraCpf.setPlaceholderCharacter('_');
+            mascaraCpf.install(cpfField);
+
+            MaskFormatter mascaraData = new MaskFormatter("##/##/####");
+            mascaraData.setPlaceholderCharacter('_');
+            mascaraData.install(nascimentoField);
+
+            MaskFormatter mascaraCelular = new MaskFormatter("(##) #####-####");
+            mascaraCelular.setPlaceholderCharacter('_');
+            mascaraCelular.install(celularField);
+        } catch (java.text.ParseException e) {
+            System.err.println("Erro ao aplicar máscaras: " + e.getMessage());
+        }
+    }
+
+    private void configurarEventos() {
+        cadastrarPacienteButton.addActionListener(e -> cadastrarPaciente());
+    }
+
+    private void cadastrarPaciente() {
+        // Valida e coleta dados
+        String nome = nomeField.getText().trim();
+        if (nome.isEmpty()) {
+            JOptionPane.showMessageDialog(CadastroPacientePainel, "O nome do paciente é obrigatório.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String cpf = cpfField.getText().replaceAll("\\D", "");
+        if (cpf.length() != 11) {
+            JOptionPane.showMessageDialog(CadastroPacientePainel, "O CPF deve conter 11 dígitos.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String celular = celularField.getText().replaceAll("[^0-9]", "");
+
+        // Valida e converter a data
+        LocalDate dataNascimento;
+        DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        try {
+
+            if (nascimentoField.getText().contains("_")) {
+                throw new DateTimeParseException("Data incompleta", nascimentoField.getText(), 0);
+            }
+            dataNascimento = LocalDate.parse(nascimentoField.getText(), formatadorData);
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(CadastroPacientePainel, "Data de nascimento inválida ou incompleta. Use o formato DD/MM/AAAA.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Cria o objeto Paciente
+        Paciente novoPaciente = new Paciente();
+        novoPaciente.setNome(nome);
+        novoPaciente.setCpf(cpf);
+        novoPaciente.setDataNascimento(dataNascimento);
+        novoPaciente.setCelular(celular);
+
+        // Salva no banco de dados em uma thread separada
+        cadastrarPacienteButton.setEnabled(false);
+        cadastrarPacienteButton.setText("Salvando...");
+
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                PacienteDAO dao = new PacienteDAO();
+                dao.salvar(novoPaciente);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get(); // Verifica se houve exceções
+                    JOptionPane.showMessageDialog(CadastroPacientePainel, "Paciente cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    limparCampos();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(CadastroPacientePainel, "Erro ao salvar paciente: " + e.getCause().getMessage(), "Erro de Banco de Dados", JOptionPane.ERROR_MESSAGE);
+                    e.printStackTrace();
+                } finally {
+                    cadastrarPacienteButton.setEnabled(true);
+                    cadastrarPacienteButton.setText("Cadastrar Paciente");
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void limparCampos() {
+        nomeField.setText("");
+        cpfField.setValue("");
+        nascimentoField.setValue("");
+        celularField.setValue("");
+        nomeField.requestFocus();
+    }
+
+
+    // A CHAVE ESTÁ AQUI: O CÓDIGO GERADO PELA IDE AGORA ESTÁ DENTRO DA CLASSE
+    {
+// GUI initializer generated by IntelliJ IDEA GUI Designer
+// >>> IMPORTANT!! <<<
+// DO NOT EDIT OR ADD ANY CODE HERE!
+        $$$setupUI$$$();
+    }
+
+    /**
+     * Method generated by IntelliJ IDEA GUI Designer
+     * >>> IMPORTANT!! <<<
+     * DO NOT edit this method OR call it in your code!
+     *
+     * @noinspection ALL
+     */
+    private void $$$setupUI$$$() {
+        CadastroPacientePainel = new JPanel();
+        CadastroPacientePainel.setLayout(new GridLayoutManager(14, 4, new Insets(0, 0, 0, 0), -1, -1));
+        CadastroPacientePainel.setBackground(new Color(-1576449));
+        CadastroPacientePainel.setEnabled(false);
+        nomeField = new JTextField();
+        nomeField.setText("");
+        CadastroPacientePainel.add(nomeField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label1 = new JLabel();
+        label1.setForeground(new Color(-16777216));
+        label1.setText("Nome do Paciente:");
+        CadastroPacientePainel.add(label1, new GridConstraints(3, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer1 = new Spacer();
+        CadastroPacientePainel.add(spacer1, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer2 = new Spacer();
+        CadastroPacientePainel.add(spacer2, new GridConstraints(3, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer3 = new Spacer();
+        CadastroPacientePainel.add(spacer3, new GridConstraints(13, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setForeground(new Color(-16777216));
+        label2.setText("CPF:");
+        CadastroPacientePainel.add(label2, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        label3.setForeground(new Color(-16777216));
+        label3.setText("Data de Nascimento:");
+        CadastroPacientePainel.add(label3, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cpfField = new JFormattedTextField();
+        CadastroPacientePainel.add(cpfField, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        nascimentoField = new JFormattedTextField();
+        CadastroPacientePainel.add(nascimentoField, new GridConstraints(8, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label4 = new JLabel();
+        label4.setForeground(new Color(-16777216));
+        label4.setText("CADASTRO DE PACIENTES");
+        CadastroPacientePainel.add(label4, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer4 = new Spacer();
+        CadastroPacientePainel.add(spacer4, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer5 = new Spacer();
+        CadastroPacientePainel.add(spacer5, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JLabel label5 = new JLabel();
+        label5.setForeground(new Color(-16777216));
+        label5.setText("Celular:");
+        CadastroPacientePainel.add(label5, new GridConstraints(9, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        celularField = new JFormattedTextField();
+        CadastroPacientePainel.add(celularField, new GridConstraints(10, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        cadastrarPacienteButton = new JButton();
+        cadastrarPacienteButton.setText("Cadastrar Paciente");
+        CadastroPacientePainel.add(cadastrarPacienteButton, new GridConstraints(12, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer6 = new Spacer();
+        CadastroPacientePainel.add(spacer6, new GridConstraints(11, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    public JComponent $$$getRootComponent$$$() {
+        return CadastroPacientePainel;
+    }
+} // <<<<<< ESTA CHAVE FINAL AGORA ESTÁ NO LUGAR CERTO.
