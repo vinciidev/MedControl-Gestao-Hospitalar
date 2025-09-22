@@ -11,20 +11,20 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="file://$USER_HOME$/Downloads/jars/jars" />
+          <root url="jar://$APPLICATION_HOME_DIR$/lib/forms_rt.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-        <jarDirectory url="file://$USER_HOME$/Downloads/jars/jars" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$APPLICATION_HOME_DIR$/lib/forms_rt.jar!/" />
+          <root url="file://$USER_HOME$/OneDrive/Desktop/jars" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+        <jarDirectory url="file://$USER_HOME$/OneDrive/Desktop/jars" recursive="false" />
       </library>
     </orderEntry>
   </component>

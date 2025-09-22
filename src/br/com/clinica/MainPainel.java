@@ -125,13 +125,24 @@ public class MainPainel {
         });
 
         adminButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(mainPainel.getTopLevelAncestor(), "Tela de admin em breve!");
-            // Futuramente: new AdminForm();
+            JFrame cadastroFrame = new JFrame("Cadastro de Usuário");
+            JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(mainPainel);
+            if (mainFrame != null) {
+                cadastroFrame.setIconImages(mainFrame.getIconImages());
+            }
+
+            cadastroFrame.setContentPane(new CadastroUsuarioForm().getPainel());
+            cadastroFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // DISPOSE_ON_CLOSE fecha só esta janela
+            cadastroFrame.setSize(450, 500);
+            cadastroFrame.setLocationRelativeTo(mainFrame); // Centraliza em relação à tela principal
+            cadastroFrame.setVisible(true);
         });
+
         prontuarioEButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(mainPainel.getTopLevelAncestor(), "Tela de prontuários em breve!");
             // Futuramente: new ProntuarioForm();
         });
+
         marcacoesButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(mainPainel.getTopLevelAncestor(), "Tela de marcações em breve!");
             // Futuramente: new MarcacoesForm();
