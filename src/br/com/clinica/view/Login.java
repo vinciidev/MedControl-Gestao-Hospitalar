@@ -1,4 +1,4 @@
-package br.com.clinica;
+package br.com.clinica.view;
 
 import br.com.clinica.db.UsuarioDAO;
 import br.com.clinica.model.Usuario;

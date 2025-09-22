@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 
 public class UsuarioDAO {
 
@@ -43,6 +45,29 @@ public class UsuarioDAO {
         return usuario;
     }
 
+    public List<Usuario> listarMedicos() {
+        List<Usuario> medicos = new ArrayList<>();
+        // A query busca todos os usuários cuja role seja 'MEDICO'
+        String sql = "SELECT id, username, nome, role FROM usuarios WHERE role = 'MEDICO' ORDER BY nome";
+        try (Connection conn = Conexao.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Usuario medico = new Usuario();
+                medico.setId(rs.getString("id"));
+                medico.setUsername(rs.getString("username"));
+                medico.setNome(rs.getString("nome"));
+                medico.setRole(Usuario.Role.valueOf(rs.getString("role")));
+                medicos.add(medico);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar médicos: " + e.getMessage(), e);
+        }
+        return medicos;
+    }
+
+
     public boolean verificarConexao() {
         try (Connection conn = Conexao.getConexao()) {
             return conn != null && !conn.isClosed();
@@ -78,3 +103,4 @@ public class UsuarioDAO {
         return generatedId;
     }
 }
+

@@ -1,9 +1,12 @@
-package br.com.clinica;
+package br.com.clinica.view;
 
+import br.com.clinica.ImagePanel;
 import br.com.clinica.model.Usuario;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+
+import javax.swing.JInternalFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,6 +34,7 @@ public class MainPainel {
     private JLabel labelTemperatura;
     private JLabel labelRole;
     private JPanel customPanel;
+    private JDesktopPane desktopPane;
 
     private final Usuario usuarioLogado;
 
@@ -144,9 +148,21 @@ public class MainPainel {
         });
 
         marcacoesButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(mainPainel.getTopLevelAncestor(), "Tela de marcações em breve!");
-            // Futuramente: new MarcacoesForm();
+            // Procura por uma janela de consulta já aberta para não abrir várias iguais
+            JInternalFrame[] frames = desktopPane.getAllFrames();
+            for (JInternalFrame frame : frames) {
+                if (frame instanceof ConsultaView) {
+                    frame.moveToFront(); // Se já estiver aberta, traz para frente
+                    return;
+                }
+            }
+
+            // Se não encontrou, cria uma nova
+            ConsultaView consultaView = new ConsultaView();
+            desktopPane.add(consultaView); // Adiciona a janela de consultas ao painel principal
+            consultaView.setVisible(true); // Exibe a janela
         });
+
     }
 
 

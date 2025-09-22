@@ -1,5 +1,7 @@
 package br.com.clinica;
 
+import br.com.clinica.view.Login;
+
 import javax.swing.*;
 import java.net.URL;
 
