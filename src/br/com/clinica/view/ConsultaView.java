@@ -34,7 +34,7 @@ public class ConsultaView extends JInternalFrame {
         consultaDAO = new ConsultaDAO();
         setSize(900, 600);
 
-        // ... (o código que cria os painéis e botões continua o mesmo)
+
         JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
         formPanel.setBorder(BorderFactory.createTitledBorder("Agendar Nova Consulta"));
         formPanel.add(new JLabel("Paciente:"));
