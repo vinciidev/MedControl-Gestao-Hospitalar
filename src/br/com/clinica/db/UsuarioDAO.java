@@ -1,5 +1,6 @@
 package br.com.clinica.db;
 
+import br.com.clinica.model.ClinicaException;
 import br.com.clinica.model.Medico;
 import br.com.clinica.model.Usuario;
 import java.sql.Connection;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 
 public class UsuarioDAO {
+
     public Usuario autenticar(String username, String password) {
         String sql = "SELECT id, nome, username, role FROM usuarios WHERE username = ? AND password = ?";
         Usuario usuario = null;
@@ -44,11 +46,17 @@ public class UsuarioDAO {
         }
     }
 
-    public void salvarUsuario(Usuario usuario) throws SQLException {
+
+    public void salvarUsuario(Usuario usuario) throws SQLException, ClinicaException {
         String sqlUsuario = "INSERT INTO usuarios (nome, username, password, role) VALUES (?, ?, ?, ?::roles) RETURNING id";
         Connection conn = null;
 
         try {
+
+            if (usuarioJaExiste(usuario.getUsername())) {
+                throw new ClinicaException("Este nome de usuário já está em uso. Por favor, escolha outro.");
+            }
+
             conn = Conexao.getConexao();
             conn.setAutoCommit(false);
 
@@ -67,15 +75,12 @@ public class UsuarioDAO {
                 }
             }
 
-
             if (usuario.getRole() == Usuario.Role.MEDICO) {
-
                 Random random = new Random();
                 String crmAleatorio = String.format("%05d", random.nextInt(100000));
 
                 Medico medico = new Medico();
                 medico.setCrm(crmAleatorio);
-
                 medico.setEspecialidade("Clinico Geral");
                 medico.setUsuarioId(usuarioId);
                 new MedicoDAO().salvar(medico, conn);
@@ -85,6 +90,9 @@ public class UsuarioDAO {
 
         } catch (SQLException e) {
             if (conn != null) conn.rollback();
+            throw e;
+        } catch (ClinicaException e) {
+
             throw e;
         } finally {
             if (conn != null) {

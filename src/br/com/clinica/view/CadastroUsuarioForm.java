@@ -1,12 +1,14 @@
 package br.com.clinica.view;
 
 import br.com.clinica.db.UsuarioDAO;
+import br.com.clinica.model.ClinicaException;
 import br.com.clinica.model.Usuario;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class CadastroUsuarioForm {
     private JPanel cadastroUsuarioPainel;
@@ -17,7 +19,7 @@ public class CadastroUsuarioForm {
     private JButton cadastrarButton;
 
     public CadastroUsuarioForm() {
-        $$$setupUI$$$(); // Método gerado pelo IntelliJ GUI Designer
+        $$$setupUI$$$();
         popularComboBoxRoles();
         configurarEventos();
     }
@@ -71,37 +73,38 @@ public class CadastroUsuarioForm {
         cadastrarButton.setEnabled(false);
         cadastrarButton.setText("Salvando...");
 
-        SwingWorker<String, Void> worker = new SwingWorker<>() {
+
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
-            protected String doInBackground() throws Exception {
+            protected Void doInBackground() throws Exception {
                 UsuarioDAO dao = new UsuarioDAO();
 
-                if (dao.usuarioJaExiste(novoUsuario.getUsername())) {
-                    return "USUARIO_EXISTENTE";
-                }
-
                 dao.salvarUsuario(novoUsuario);
-                return "SUCESSO";
+                return null;
             }
 
             @Override
             protected void done() {
                 try {
-                    String resultado = get();
-
-                    if ("SUCESSO".equals(resultado)) {
-                        JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Usuário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                        limparCampos();
-                    } else if ("USUARIO_EXISTENTE".equals(resultado)) {
-                        JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Erro ao salvar usuário: Este nome de usuário já está em uso.", "Erro", JOptionPane.ERROR_MESSAGE);
-                    }
+                    get();
+                    JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Usuário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    limparCampos();
 
                 } catch (Exception e) {
-                    String mensagemErro = "Ocorreu um erro inesperado ao tentar salvar o usuário.";
-                    if (e.getCause() != null) {
-                        mensagemErro = e.getCause().getMessage();
+
+                    Throwable causa = e.getCause();
+
+                    if (causa instanceof ClinicaException) {
+
+                        JOptionPane.showMessageDialog(cadastroUsuarioPainel, causa.getMessage(), "Erro de Validação", JOptionPane.WARNING_MESSAGE);
+                    } else if (causa instanceof SQLException) {
+
+                        JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Ocorreu um erro de banco de dados: " + causa.getMessage(), "Erro de Persistência", JOptionPane.ERROR_MESSAGE);
+                    } else {
+
+                        JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Ocorreu um erro inesperado: " + (causa != null ? causa.getMessage() : e.getMessage()), "Erro", JOptionPane.ERROR_MESSAGE);
+                        e.printStackTrace();
                     }
-                    JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Erro: " + mensagemErro, "Erro", JOptionPane.ERROR_MESSAGE);
                 } finally {
                     cadastrarButton.setEnabled(true);
                     cadastrarButton.setText("Cadastrar Usuário");
@@ -118,6 +121,7 @@ public class CadastroUsuarioForm {
         tipoComboBox.setSelectedIndex(0);
         nomeField.requestFocusInWindow();
     }
+
 
     private void $$$setupUI$$$() {
         cadastroUsuarioPainel = new JPanel();
