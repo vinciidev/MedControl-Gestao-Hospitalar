@@ -148,24 +148,45 @@ public class ConsultaView extends JInternalFrame {
         }
     }
 
+// Em ConsultaView.java
+
     private void atualizarTabela() {
         (new SwingWorker<List<Consulta>, Void>() {
-            @Override protected List<Consulta> doInBackground() { return consultaDAO.listarTodas(); }
-            @Override protected void done() {
+            @Override
+            protected List<Consulta> doInBackground() {
+                return consultaDAO.listarTodas();
+            }
+
+            @Override
+            protected void done() {
                 try {
-                    listaConsultasAtual = get(); // <-- ADICIONE ESTA LINHA PARA GUARDAR A LISTA
-                    tableModel.setRowCount(0);
+                    listaConsultasAtual = get(); // Guarda a lista de consultas
+                    tableModel.setRowCount(0);   // Limpa a tabela
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-                    for (Consulta c : listaConsultasAtual) { // Use a lista guardada
-                        // ... (resto do seu loop for)
+
+                    // Itera sobre a lista de consultas e adiciona cada uma na tabela
+                    for (Consulta c : listaConsultasAtual) {
+                        // --- LINHA QUE FALTAVA ---
+                        tableModel.addRow(new Object[]{
+                                c.getId(),
+                                c.getPaciente().getNome(),
+                                c.getMedico().getNome(),
+                                c.getDataHora().format(formatter),
+                                c.getStatus()
+                        });
+                        // -------------------------
                     }
-                } catch (Exception e) { e.printStackTrace(); }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(ConsultaView.this,
+                            "Erro ao atualizar a tabela de consultas: " + e.getMessage(),
+                            "Erro", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }).execute();
     }
 
-    // O resto dos métodos (alterarStatus, carregarPacientes, excluirConsulta) continua igual.
-    private void alterarStatus(String novoStatus) { /* ... */ }
+
     private void carregarPacientes() {
         cbPaciente.removeAllItems(); // Limpa a lista para não duplicar
 
@@ -200,5 +221,75 @@ public class ConsultaView extends JInternalFrame {
         };
         worker.execute(); // Inicia a busca
     }
-    private void excluirConsulta() { /* ... */ }
+    private void excluirConsulta() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor, selecione uma consulta para excluir.", "Nenhuma Consulta Selecionada", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja excluir a consulta selecionada?\nEsta ação não pode ser desfeita.", "Confirmar Exclusão", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        String consultaId = (String) tableModel.getValueAt(selectedRow, 0);
+
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                consultaDAO.excluir(consultaId);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get(); // Verifica se houve erro no doInBackground
+                    JOptionPane.showMessageDialog(ConsultaView.this, "Consulta excluída com sucesso!");
+                    atualizarTabela(); // Atualiza a tabela para refletir a exclusão
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(ConsultaView.this, "Erro ao excluir consulta: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void alterarStatus(String novoStatus) {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor, selecione uma consulta para alterar o status.", "Nenhuma Consulta Selecionada", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this, "Deseja realmente alterar o status desta consulta para '" + novoStatus + "'?", "Confirmar Alteração de Status", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        String consultaId = (String) tableModel.getValueAt(selectedRow, 0);
+
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                consultaDAO.atualizarStatusConsulta(consultaId, novoStatus);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                    JOptionPane.showMessageDialog(ConsultaView.this, "Status da consulta atualizado com sucesso!");
+                    atualizarTabela();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(ConsultaView.this, "Erro ao atualizar status: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        worker.execute();
+    }
 }

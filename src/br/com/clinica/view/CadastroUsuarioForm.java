@@ -7,6 +7,8 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
+import java.util.concurrent.ExecutionException;
 
 public class CadastroUsuarioForm {
     private JPanel cadastroUsuarioPainel;
@@ -16,9 +18,8 @@ public class CadastroUsuarioForm {
     private JComboBox<Usuario.Role> tipoComboBox;
     private JButton cadastrarButton;
 
-    // Construtor
     public CadastroUsuarioForm() {
-        // O IntelliJ vai chamar $$$setupUI$$$() aqui
+        $$$setupUI$$$(); // Método gerado pelo IntelliJ GUI Designer
         popularComboBoxRoles();
         configurarEventos();
     }
@@ -28,7 +29,6 @@ public class CadastroUsuarioForm {
     }
 
     private void popularComboBoxRoles() {
-        // Limpa o ComboBox antes de adicionar para evitar duplicatas
         tipoComboBox.removeAllItems();
         for (Usuario.Role role : Usuario.Role.values()) {
             tipoComboBox.addItem(role);
@@ -40,28 +40,24 @@ public class CadastroUsuarioForm {
     }
 
     private void cadastrarUsuario() {
-        // Validação de Nome
         String nome = nomeField.getText().trim();
         if (nome.isEmpty()) {
             JOptionPane.showMessageDialog(cadastroUsuarioPainel, "O nome completo é obrigatório.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Validação de Username
         String username = usernameField.getText().trim();
         if (username.isEmpty()) {
             JOptionPane.showMessageDialog(cadastroUsuarioPainel, "O nome de usuário é obrigatório.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Validação de Senha
         char[] password = senhaField.getPassword();
         if (password.length == 0) {
             JOptionPane.showMessageDialog(cadastroUsuarioPainel, "A senha é obrigatória.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Validação da Role
         Usuario.Role selectedRole = (Usuario.Role) tipoComboBox.getSelectedItem();
         if (selectedRole == null) {
             JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Selecione um perfil para o usuário.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
@@ -77,28 +73,41 @@ public class CadastroUsuarioForm {
         cadastrarButton.setEnabled(false);
         cadastrarButton.setText("Salvando...");
 
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+        // Usando SwingWorker para não travar a interface
+        SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
-            protected Void doInBackground() throws Exception {
-                new UsuarioDAO().salvarNovoUsuario(novoUsuario);
-                return null;
+            protected String doInBackground() throws Exception {
+                UsuarioDAO dao = new UsuarioDAO();
+
+                // 1. VERIFICAÇÃO PROATIVA: Checa se o usuário já existe ANTES de tentar salvar.
+                if (dao.usuarioJaExiste(novoUsuario.getUsername())) {
+                    return "USUARIO_EXISTENTE"; // Retorna um código para indicar o problema
+                }
+
+                // 2. Se não existir, prossegue com a operação de salvar.
+                dao.salvarUsuario(novoUsuario);
+                return "SUCESSO"; // Retorna um código de sucesso
             }
 
             @Override
             protected void done() {
                 try {
-                    get();
-                    JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Usuário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                    limparCampos();
+                    String resultado = get(); // Pega o resultado do doInBackground()
+
+                    if ("SUCESSO".equals(resultado)) {
+                        JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Usuário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                        limparCampos();
+                    } else if ("USUARIO_EXISTENTE".equals(resultado)) {
+                        JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Erro ao salvar usuário: Este nome de usuário já está em uso.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
+
                 } catch (Exception e) {
-                    String mensagemErro = "Ocorreu um erro inesperado.";
+                    // Trata outros erros que possam ocorrer (ex: falha de conexão com o BD)
+                    String mensagemErro = "Ocorreu um erro inesperado ao tentar salvar o usuário.";
                     if (e.getCause() != null) {
                         mensagemErro = e.getCause().getMessage();
-                        if (mensagemErro.contains("usuarios_username_key")) {
-                            mensagemErro = "Este nome de usuário já está em uso.";
-                        }
                     }
-                    JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Erro ao salvar usuário: " + mensagemErro, "Erro", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Erro: " + mensagemErro, "Erro", JOptionPane.ERROR_MESSAGE);
                 } finally {
                     cadastrarButton.setEnabled(true);
                     cadastrarButton.setText("Cadastrar Usuário");
@@ -112,47 +121,39 @@ public class CadastroUsuarioForm {
         nomeField.setText("");
         usernameField.setText("");
         senhaField.setText("");
-        tipoComboBox.setSelectedIndex(-1);
+        tipoComboBox.setSelectedIndex(0);
         nomeField.requestFocusInWindow();
     }
 
-    {
-        $$$setupUI$$$();
-    }
+    // O restante do seu código gerado pela IDE continua aqui...
 
     private void $$$setupUI$$$() {
         cadastroUsuarioPainel = new JPanel();
         cadastroUsuarioPainel.setLayout(new GridLayoutManager(6, 2, new Insets(10, 10, 10, 10), -1, -1));
-
-        final JLabel labelTitle = new JLabel();
-        labelTitle.setFont(new Font(labelTitle.getFont().getName(), Font.BOLD, 16));
-        labelTitle.setText("Cadastro de Usuário");
-        cadastroUsuarioPainel.add(labelTitle, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-
-        final JLabel labelNome = new JLabel();
-        labelNome.setText("Nome Completo:");
-        cadastroUsuarioPainel.add(labelNome, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label1 = new JLabel();
+        label1.setFont(new Font(label1.getFont().getName(), Font.BOLD, 16));
+        label1.setText("Cadastro de Usuário");
+        cadastroUsuarioPainel.add(label1, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("Nome Completo:");
+        cadastroUsuarioPainel.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         nomeField = new JTextField();
         cadastroUsuarioPainel.add(nomeField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-
-        final JLabel labelUsername = new JLabel();
-        labelUsername.setText("Username:");
-        cadastroUsuarioPainel.add(labelUsername, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        label3.setText("Username:");
+        cadastroUsuarioPainel.add(label3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         usernameField = new JTextField();
         cadastroUsuarioPainel.add(usernameField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-
-        final JLabel labelSenha = new JLabel();
-        labelSenha.setText("Senha:");
-        cadastroUsuarioPainel.add(labelSenha, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label4 = new JLabel();
+        label4.setText("Senha:");
+        cadastroUsuarioPainel.add(label4, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         senhaField = new JPasswordField();
         cadastroUsuarioPainel.add(senhaField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-
-        final JLabel labelTipo = new JLabel();
-        labelTipo.setText("Tipo de Perfil:");
-        cadastroUsuarioPainel.add(labelTipo, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        tipoComboBox = new JComboBox<>();
+        final JLabel label5 = new JLabel();
+        label5.setText("Tipo de Perfil:");
+        cadastroUsuarioPainel.add(label5, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        tipoComboBox = new JComboBox();
         cadastroUsuarioPainel.add(tipoComboBox, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-
         cadastrarButton = new JButton();
         cadastrarButton.setText("Cadastrar Usuário");
         cadastroUsuarioPainel.add(cadastrarButton, new GridConstraints(5, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

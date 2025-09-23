@@ -26,7 +26,6 @@ public class MainPainel {
     private JButton sairButton;
     private JButton cadastrarNovoPacienteButton;
     private JButton adminButton;
-    private JButton prontuarioEButton;
     private JButton marcacoesButton;
     private JLabel labelBoasVindas;
     private JLabel labelHora;
@@ -44,11 +43,8 @@ public class MainPainel {
         $$$setupUI$$$();
 
         desktopPane = new JDesktopPane();
-
         desktopPane.setLayout(new BorderLayout());
-
         desktopPane.add(customPanel, BorderLayout.CENTER);
-
         desktopPane.setLayer(customPanel, Integer.valueOf(Integer.MIN_VALUE));
 
         mainPainel.remove(customPanel);
@@ -60,7 +56,41 @@ public class MainPainel {
 
         configurarLabelsDinamicos();
         configurarEventos();
+        configurarAcessosPorRole(); // <-- NOVO MÉTODO CHAMADO AQUI
     }
+
+    // --- INÍCIO DA ALTERAÇÃO ---
+
+    /**
+     * Controla a visibilidade dos botões com base na função (role) do usuário logado.
+     */
+    private void configurarAcessosPorRole() {
+        // Pega a função do usuário logado
+        Usuario.Role role = usuarioLogado.getRole();
+
+        // Usa um switch para definir as permissões de cada função
+        switch (role) {
+            case MEDICO:
+            case RECEPCIONISTA:
+                // Esconde os botões que eles não podem acessar
+                cadastrarNovoPacienteButton.setVisible(false);
+                adminButton.setVisible(false);
+                break;
+
+            case ADMINISTRADOR:
+            case TI:
+                // Podem ver tudo, então não fazemos nada aqui (os botões já são visíveis por padrão)
+                break;
+
+            default:
+                // Por segurança, caso uma nova role seja criada e não tratada, esconde os botões sensíveis
+                cadastrarNovoPacienteButton.setVisible(false);
+                adminButton.setVisible(false);
+                break;
+        }
+    }
+
+    // --- FIM DA ALTERAÇÃO ---
 
     public JPanel getMainPainel() {
         return mainPainel;
@@ -80,7 +110,6 @@ public class MainPainel {
         buscarTemperatura();
     }
 
-
     private void atualizarData() {
         LocalDate hoje = LocalDate.now();
         Locale localeBrasil = new Locale("pt", "BR");
@@ -98,6 +127,7 @@ public class MainPainel {
         SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
             protected String doInBackground() throws Exception {
+                // Assumindo que a localização é Feira de Santana, conforme a conversa anterior
                 URL url = new URL("https://wttr.in/Feira%20de%20Santana?format=%t");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
@@ -129,17 +159,15 @@ public class MainPainel {
 
         cadastrarNovoPacienteButton.addActionListener(e -> {
             JFrame cadastroFrame = new JFrame("Cadastro de Novo Paciente");
-
-            // Pega o ícone da janela principal e aplica na nova
             JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(mainPainel);
             if (mainFrame != null) {
                 cadastroFrame.setIconImages(mainFrame.getIconImages());
             }
 
             cadastroFrame.setContentPane(new CadastroPacienteForm().getPainel());
-            cadastroFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // DISPOSE_ON_CLOSE fecha só esta janela
+            cadastroFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             cadastroFrame.setSize(450, 500);
-            cadastroFrame.setLocationRelativeTo(mainFrame); // Centraliza em relação à tela principal
+            cadastroFrame.setLocationRelativeTo(mainFrame);
             cadastroFrame.setVisible(true);
         });
 
@@ -151,46 +179,43 @@ public class MainPainel {
             }
 
             cadastroFrame.setContentPane(new CadastroUsuarioForm().getPainel());
-            cadastroFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // DISPOSE_ON_CLOSE fecha só esta janela
+            cadastroFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             cadastroFrame.setSize(450, 500);
-            cadastroFrame.setLocationRelativeTo(mainFrame); // Centraliza em relação à tela principal
+            cadastroFrame.setLocationRelativeTo(mainFrame);
             cadastroFrame.setVisible(true);
         });
 
-        prontuarioEButton.addActionListener(e -> {
-            // Este botão agora abre a tela de CONSULTAS
-            // onde o usuário poderá selecionar uma e abrir o prontuário.
+        marcacoesButton.addActionListener(e -> {
             JInternalFrame[] frames = desktopPane.getAllFrames();
             for (JInternalFrame frame : frames) {
                 if (frame instanceof ConsultaView) {
-                    frame.moveToFront();
+                    try {
+                        if (frame.isIcon()) frame.setIcon(false); // Restaura se estiver minimizado
+                        frame.setSelected(true); // Traz para frente e foca
+                    } catch (java.beans.PropertyVetoException ex) {
+                        // Ignora exceção
+                    }
                     return;
                 }
             }
+
             ConsultaView consultaView = new ConsultaView();
             desktopPane.add(consultaView);
-
             consultaView.setVisible(true);
         });
-
-        marcacoesButton.addActionListener(e -> {
-            // Procura por uma janela de consulta já aberta para não abrir várias iguais
-            JInternalFrame[] frames = desktopPane.getAllFrames();
-            for (JInternalFrame frame : frames) {
-                if (frame instanceof ConsultaView) {
-                    frame.moveToFront(); // Se já estiver aberta, traz para frente
-                    return;
-                }
-            }
-
-
-            ConsultaView consultaView = new ConsultaView();
-            desktopPane.add(consultaView); // Adiciona a janela de consultas ao painel principal
-            consultaView.setVisible(true); // Exibe a janela
-        });
-
     }
 
+    private void createUIComponents() {
+        try {
+            URL imageURL = getClass().getResource("/images/homeImage.png");
+            if (imageURL == null) throw new Exception("Arquivo de imagem não encontrado");
+            Image backgroundImage = new ImageIcon(imageURL).getImage();
+            customPanel = new ImagePanel(backgroundImage);
+        } catch (Exception e) {
+            customPanel = new JPanel();
+            System.err.println("Imagem de fundo não encontrada: " + e.getMessage());
+        }
+    }
 
     /**
      * Method generated by IntelliJ IDEA GUI Designer
@@ -211,13 +236,10 @@ public class MainPainel {
         mainPainel.add(sairButton, new GridConstraints(0, 9, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         cadastrarNovoPacienteButton = new JButton();
         cadastrarNovoPacienteButton.setText("Cadastrar Novo Paciente");
-        mainPainel.add(cadastrarNovoPacienteButton, new GridConstraints(0, 0, 1, 6, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        mainPainel.add(cadastrarNovoPacienteButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         adminButton = new JButton();
         adminButton.setText("Admin");
         mainPainel.add(adminButton, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        prontuarioEButton = new JButton();
-        prontuarioEButton.setText("Prontuário E.");
-        mainPainel.add(prontuarioEButton, new GridConstraints(0, 7, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
         mainPainel.add(spacer2, new GridConstraints(2, 0, 1, 11, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
@@ -239,8 +261,8 @@ public class MainPainel {
         labelTemperatura.setText("Temperatura:");
         mainPainel.add(labelTemperatura, new GridConstraints(6, 9, 1, 2, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         marcacoesButton = new JButton();
-        marcacoesButton.setText("Marcações");
-        mainPainel.add(marcacoesButton, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        marcacoesButton.setText("Marcações / Prontuário Eletrônico");
+        mainPainel.add(marcacoesButton, new GridConstraints(0, 1, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         labelRole = new JLabel();
         labelRole.setForeground(new Color(-262149));
         labelRole.setText("Role");
@@ -253,18 +275,5 @@ public class MainPainel {
      */
     public JComponent $$$getRootComponent$$$() {
         return mainPainel;
-    }
-
-    private void createUIComponents() {
-        try {
-            URL imageURL = getClass().getResource("/images/homeImage.png");
-            Image backgroundImage = new ImageIcon(imageURL).getImage();
-
-            customPanel = new ImagePanel(backgroundImage); //
-
-        } catch (Exception e) {
-            customPanel = new JPanel(); //
-            System.err.println("Imagem de fundo não encontrada.");
-        }
     }
 }

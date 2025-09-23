@@ -1,5 +1,3 @@
-// src/br/com/clinica/model/Medico.java
-
 package br.com.clinica.model;
 
 public class Medico {
