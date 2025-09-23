@@ -7,14 +7,6 @@ import java.sql.SQLException;
 
 public class MedicoDAO {
 
-    /**
-     * Salva um novo registro de médico. Este método espera receber uma conexão
-     * existente para poder fazer parte de uma transação maior.
-     * @param medico O objeto Medico a ser salvo.
-     * @param conn A conexão de banco de dados ativa.
-     * @throws SQLException
-     */
-
     public void salvar(Medico medico, Connection conn) throws SQLException {
         String sql = "INSERT INTO medicos (crm, especialidade, usuario_id) VALUES (?, ?, ?::uuid)";
 

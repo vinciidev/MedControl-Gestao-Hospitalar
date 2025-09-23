@@ -7,8 +7,6 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.SQLException;
-import java.util.concurrent.ExecutionException;
 
 public class CadastroUsuarioForm {
     private JPanel cadastroUsuarioPainel;
@@ -73,26 +71,23 @@ public class CadastroUsuarioForm {
         cadastrarButton.setEnabled(false);
         cadastrarButton.setText("Salvando...");
 
-        // Usando SwingWorker para não travar a interface
         SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
             protected String doInBackground() throws Exception {
                 UsuarioDAO dao = new UsuarioDAO();
 
-                // 1. VERIFICAÇÃO PROATIVA: Checa se o usuário já existe ANTES de tentar salvar.
                 if (dao.usuarioJaExiste(novoUsuario.getUsername())) {
-                    return "USUARIO_EXISTENTE"; // Retorna um código para indicar o problema
+                    return "USUARIO_EXISTENTE";
                 }
 
-                // 2. Se não existir, prossegue com a operação de salvar.
                 dao.salvarUsuario(novoUsuario);
-                return "SUCESSO"; // Retorna um código de sucesso
+                return "SUCESSO";
             }
 
             @Override
             protected void done() {
                 try {
-                    String resultado = get(); // Pega o resultado do doInBackground()
+                    String resultado = get();
 
                     if ("SUCESSO".equals(resultado)) {
                         JOptionPane.showMessageDialog(cadastroUsuarioPainel, "Usuário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
@@ -102,7 +97,6 @@ public class CadastroUsuarioForm {
                     }
 
                 } catch (Exception e) {
-                    // Trata outros erros que possam ocorrer (ex: falha de conexão com o BD)
                     String mensagemErro = "Ocorreu um erro inesperado ao tentar salvar o usuário.";
                     if (e.getCause() != null) {
                         mensagemErro = e.getCause().getMessage();
@@ -124,8 +118,6 @@ public class CadastroUsuarioForm {
         tipoComboBox.setSelectedIndex(0);
         nomeField.requestFocusInWindow();
     }
-
-    // O restante do seu código gerado pela IDE continua aqui...
 
     private void $$$setupUI$$$() {
         cadastroUsuarioPainel = new JPanel();

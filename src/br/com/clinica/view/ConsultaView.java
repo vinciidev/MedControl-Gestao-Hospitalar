@@ -22,7 +22,7 @@ import java.util.List;
 public class ConsultaView extends JInternalFrame {
     private final ConsultaDAO consultaDAO;
     private final JComboBox<Paciente> cbPaciente;
-    private final JComboBox<Usuario> cbMedico; // <-- MUDOU para Usuario
+    private final JComboBox<Usuario> cbMedico;
     private final JDateChooser dateChooser;
     private final JSpinner timeSpinner;
     private final JTable table;
@@ -41,7 +41,7 @@ public class ConsultaView extends JInternalFrame {
         cbPaciente = new JComboBox<>();
         formPanel.add(cbPaciente);
         formPanel.add(new JLabel("Médico:"));
-        cbMedico = new JComboBox<>(); // <-- JComboBox de Usuario
+        cbMedico = new JComboBox<>();
         formPanel.add(cbMedico);
         formPanel.add(new JLabel("Data da Consulta:"));
         dateChooser = new JDateChooser();
@@ -98,13 +98,10 @@ public class ConsultaView extends JInternalFrame {
             return;
         }
 
-        // Pega o objeto Consulta completo da lista que guardamos
         Consulta consultaSelecionada = listaConsultasAtual.get(selectedRow);
 
-        // Agora, passamos a consulta selecionada para o construtor
         ProntuarioView prontuarioView = new ProntuarioView(consultaSelecionada);
 
-        // Adiciona a janela de prontuário ao painel principal
         JDesktopPane desktopPane = getDesktopPane();
         desktopPane.add(prontuarioView);
         prontuarioView.setVisible(true);
@@ -113,7 +110,6 @@ public class ConsultaView extends JInternalFrame {
     private void carregarMedicos() {
         cbMedico.removeAllItems();
         (new SwingWorker<List<Usuario>, Void>() {
-            // Usa o novo método do UsuarioDAO
             @Override protected List<Usuario> doInBackground() { return new UsuarioDAO().listarMedicos(); }
             @Override protected void done() {
                 try { get().forEach(cbMedico::addItem); } catch (Exception e) { e.printStackTrace(); }
@@ -125,9 +121,8 @@ public class ConsultaView extends JInternalFrame {
         try {
             Consulta consulta = new Consulta();
             consulta.setPaciente((Paciente) cbPaciente.getSelectedItem());
-            consulta.setMedico((Usuario) cbMedico.getSelectedItem()); // <-- Cast para Usuario
+            consulta.setMedico((Usuario) cbMedico.getSelectedItem());
 
-            // ... (resto do método agendarConsulta continua igual)
             Date data = dateChooser.getDate();
             Date hora = (Date) timeSpinner.getValue();
             if (data == null || hora == null) {
@@ -148,8 +143,6 @@ public class ConsultaView extends JInternalFrame {
         }
     }
 
-// Em ConsultaView.java
-
     private void atualizarTabela() {
         (new SwingWorker<List<Consulta>, Void>() {
             @Override
@@ -160,13 +153,11 @@ public class ConsultaView extends JInternalFrame {
             @Override
             protected void done() {
                 try {
-                    listaConsultasAtual = get(); // Guarda a lista de consultas
-                    tableModel.setRowCount(0);   // Limpa a tabela
+                    listaConsultasAtual = get();
+                    tableModel.setRowCount(0);
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-                    // Itera sobre a lista de consultas e adiciona cada uma na tabela
                     for (Consulta c : listaConsultasAtual) {
-                        // --- LINHA QUE FALTAVA ---
                         tableModel.addRow(new Object[]{
                                 c.getId(),
                                 c.getPaciente().getNome(),
@@ -174,7 +165,6 @@ public class ConsultaView extends JInternalFrame {
                                 c.getDataHora().format(formatter),
                                 c.getStatus()
                         });
-                        // -------------------------
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -188,23 +178,19 @@ public class ConsultaView extends JInternalFrame {
 
 
     private void carregarPacientes() {
-        cbPaciente.removeAllItems(); // Limpa a lista para não duplicar
+        cbPaciente.removeAllItems();
 
-        // Usa SwingWorker para buscar dados em segundo plano sem travar a tela
         SwingWorker<List<Paciente>, Void> worker = new SwingWorker<>() {
 
             @Override
             protected List<Paciente> doInBackground() throws Exception {
-                // Cria o DAO e chama o método para buscar todos os pacientes
                 return new PacienteDAO().listarTodos();
             }
 
             @Override
             protected void done() {
                 try {
-                    // Pega o resultado da busca (a lista de pacientes)
                     List<Paciente> pacientes = get();
-                    // Adiciona cada paciente da lista ao JComboBox
                     for (Paciente paciente : pacientes) {
                         cbPaciente.addItem(paciente);
                     }
@@ -219,7 +205,7 @@ public class ConsultaView extends JInternalFrame {
                 }
             }
         };
-        worker.execute(); // Inicia a busca
+        worker.execute();
     }
     private void excluirConsulta() {
         int selectedRow = table.getSelectedRow();
@@ -245,9 +231,9 @@ public class ConsultaView extends JInternalFrame {
             @Override
             protected void done() {
                 try {
-                    get(); // Verifica se houve erro no doInBackground
+                    get();
                     JOptionPane.showMessageDialog(ConsultaView.this, "Consulta excluída com sucesso!");
-                    atualizarTabela(); // Atualiza a tabela para refletir a exclusão
+                    atualizarTabela();
                 } catch (Exception e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(ConsultaView.this, "Erro ao excluir consulta: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);

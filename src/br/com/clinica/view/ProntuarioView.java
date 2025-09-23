@@ -6,10 +6,8 @@ import br.com.clinica.model.Prontuario;
 import javax.swing.*;
 import java.awt.*;
 
-// Adicionado "extends JInternalFrame" para que seja uma janela interna
 public class ProntuarioView extends JInternalFrame {
 
-    // --- 1. DECLARAÇÃO DAS VARIÁVEIS (Estava faltando) ---
     private final JTextArea txtAnotacoes;
     private final JTextArea txtPrescricao;
     private final JTextArea txtExames;
@@ -17,17 +15,13 @@ public class ProntuarioView extends JInternalFrame {
     private final Consulta consulta;
     private Prontuario prontuarioAtual;
 
-    // --- 2. CONSTRUTOR CORRIGIDO (Agora recebe a Consulta) ---
     public ProntuarioView(Consulta consulta) {
-        // Usa o parâmetro 'consulta' para construir o título da janela
         super("Prontuário - Paciente: " + consulta.getPaciente().getNome(), true, true, true, true);
 
-        // Inicializa a variável da classe com o parâmetro recebido
         this.consulta = consulta;
         this.prontuarioDAO = new ProntuarioDAO();
         setSize(700, 600);
 
-        // --- O resto do seu código para construir a UI ---
         JPanel mainPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -38,7 +32,7 @@ public class ProntuarioView extends JInternalFrame {
         mainPanel.add(new JLabel("Anotações Clínicas:"), gbc);
         gbc.gridy = 1;
         gbc.weighty = 0.4;
-        txtAnotacoes = new JTextArea(10, 50); // Agora esta linha funciona
+        txtAnotacoes = new JTextArea(10, 50);
         mainPanel.add(new JScrollPane(txtAnotacoes), gbc);
 
         gbc.gridy = 2;
@@ -46,7 +40,7 @@ public class ProntuarioView extends JInternalFrame {
         mainPanel.add(new JLabel("Prescrição:"), gbc);
         gbc.gridy = 3;
         gbc.weighty = 0.3;
-        txtPrescricao = new JTextArea(7, 50); // Agora esta linha funciona
+        txtPrescricao = new JTextArea(7, 50);
         mainPanel.add(new JScrollPane(txtPrescricao), gbc);
 
         gbc.gridy = 4;
@@ -54,7 +48,7 @@ public class ProntuarioView extends JInternalFrame {
         mainPanel.add(new JLabel("Exames Solicitados:"), gbc);
         gbc.gridy = 5;
         gbc.weighty = 0.3;
-        txtExames = new JTextArea(7, 50); // Agora esta linha funciona
+        txtExames = new JTextArea(7, 50);
         mainPanel.add(new JScrollPane(txtExames), gbc);
 
         JButton btnSalvar = new JButton("Salvar Prontuário");
@@ -68,7 +62,6 @@ public class ProntuarioView extends JInternalFrame {
     }
 
     private void carregarDadosProntuario() {
-        // Este método agora funciona porque as variáveis foram declaradas
         prontuarioAtual = prontuarioDAO.buscarPorConsulta(consulta.getId());
         if (prontuarioAtual != null) {
             txtAnotacoes.setText(prontuarioAtual.getAnotacoesMedico());
@@ -78,7 +71,6 @@ public class ProntuarioView extends JInternalFrame {
     }
 
     private void salvar() {
-        // E este método também
         if (prontuarioAtual == null) {
             prontuarioAtual = new Prontuario();
             prontuarioAtual.setConsultaId(consulta.getId());
@@ -89,7 +81,7 @@ public class ProntuarioView extends JInternalFrame {
         try {
             prontuarioDAO.salvar(prontuarioAtual);
             JOptionPane.showMessageDialog(this, "Prontuário salvo com sucesso!");
-            dispose(); // Fecha a janela de prontuário
+            dispose();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro ao salvar prontuário: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }

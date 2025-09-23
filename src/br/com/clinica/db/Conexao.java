@@ -11,13 +11,11 @@ public class Conexao {
     static {
         HikariConfig config = new HikariConfig();
 
-        // CORREÇÃO: Adicione o parâmetro no final da URL
         config.setJdbcUrl("jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres?prepareThreshold=0");
 
-        config.setUsername("postgres.tciizwfsfgojcccqiwhv"); // Verifique se este é o usuário correto
-        config.setPassword("@Apl197512"); // Verifique se esta é a senha correta
+        config.setUsername("postgres.tciizwfsfgojcccqiwhv");
+        config.setPassword("@Apl197512");
 
-        // Configurações do Pool
         config.setMaximumPoolSize(5);
         config.setMinimumIdle(1);
         config.setConnectionTimeout(30000);

@@ -21,7 +21,6 @@ import java.time.format.TextStyle;
 import java.util.Locale;
 
 public class MainPainel {
-    // Componentes
     private JPanel mainPainel;
     private JButton sairButton;
     private JButton cadastrarNovoPacienteButton;
@@ -56,57 +55,43 @@ public class MainPainel {
 
         configurarLabelsDinamicos();
         configurarEventos();
-        configurarAcessosPorRole(); // <-- NOVO MÉTODO CHAMADO AQUI
+        configurarAcessosPorRole();
     }
 
-    // --- INÍCIO DA ALTERAÇÃO ---
-
-    /**
-     * Controla a visibilidade dos botões com base na função (role) do usuário logado.
-     */
     private void configurarAcessosPorRole() {
-        // Pega a função do usuário logado
         Usuario.Role role = usuarioLogado.getRole();
 
-        // Usa um switch para definir as permissões de cada função
         switch (role) {
             case MEDICO:
             case RECEPCIONISTA:
-                // Esconde os botões que eles não podem acessar
                 cadastrarNovoPacienteButton.setVisible(false);
                 adminButton.setVisible(false);
                 break;
 
             case ADMINISTRADOR:
             case TI:
-                // Podem ver tudo, então não fazemos nada aqui (os botões já são visíveis por padrão)
                 break;
 
             default:
-                // Por segurança, caso uma nova role seja criada e não tratada, esconde os botões sensíveis
                 cadastrarNovoPacienteButton.setVisible(false);
                 adminButton.setVisible(false);
                 break;
         }
     }
 
-    // --- FIM DA ALTERAÇÃO ---
 
     public JPanel getMainPainel() {
         return mainPainel;
     }
 
     private void configurarLabelsDinamicos() {
-        // Label de Boas-vindas com o nome do usuario
         labelBoasVindas.setText("Olá, " + usuarioLogado.getNome());
         labelRole.setText("Função: " + usuarioLogado.getRole().toString());
 
-        // Configura data e hora
         atualizarData();
         Timer timerHora = new Timer(1000, e -> atualizarHora());
         timerHora.start();
 
-        // Função para buscar a temperatura (Com API)
         buscarTemperatura();
     }
 
@@ -127,7 +112,6 @@ public class MainPainel {
         SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
             protected String doInBackground() throws Exception {
-                // Assumindo que a localização é Feira de Santana, conforme a conversa anterior
                 URL url = new URL("https://wttr.in/Feira%20de%20Santana?format=%t");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
@@ -151,7 +135,18 @@ public class MainPainel {
 
     private void configurarEventos() {
         sairButton.addActionListener(e -> {
-            int resposta = JOptionPane.showConfirmDialog(mainPainel.getTopLevelAncestor(), "Você realmente deseja sair?", "Confirmar Saída", JOptionPane.YES_NO_OPTION);
+            Object[] options = {"Sim", "Não"};
+
+            int resposta = JOptionPane.showOptionDialog(
+                    mainPainel.getTopLevelAncestor(),
+                    "Você realmente deseja sair?",
+                    "Confirmar Saída",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
             if (resposta == JOptionPane.YES_OPTION) {
                 System.exit(0);
             }

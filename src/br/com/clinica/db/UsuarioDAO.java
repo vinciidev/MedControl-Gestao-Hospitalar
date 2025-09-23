@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Random;
 
 public class UsuarioDAO {
-
     public Usuario autenticar(String username, String password) {
         String sql = "SELECT id, nome, username, role FROM usuarios WHERE username = ? AND password = ?";
         Usuario usuario = null;
@@ -40,7 +39,7 @@ public class UsuarioDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next(); // Retorna true se encontrar um registro
+                return rs.next();
             }
         }
     }
